@@ -1,0 +1,320 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>gm</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-11-19"><meta name="DC.source" content="gm.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">prepare workspace</a></li><li><a href="#3">load the variables of the optimization problem</a></li><li><a href="#4">set up the function and its gradient</a></li><li><a href="#5">parameters of the gradient method</a></li><li><a href="#6">optimize</a></li></ul></div><pre class="codeinput"><span class="comment">% Logistic Regression</span>
+<span class="comment">%</span>
+<span class="comment">% Gradient method with a fixed step</span>
+<span class="comment">%</span>
+<span class="comment">% U. S. Kamilov, CIG, WUSTL, 2021.</span>
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="2">prepare workspace</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+clear; close <span class="string">all</span>; home;
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="3">load the variables of the optimization problem</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+load(<span class="string">'dataset.mat'</span>);
+
+[p, n] = size(A);
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="4">set up the function and its gradient</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+lambda = 0.02;
+mu = 0.001;
+evaluateFunc = @(x) (1/n)*sum(log(1+exp(-b.*(A'*x))));
+evaluateGrad = @(x) (1/n)*A*(-b.*exp(-b.*(A'*x))./(1+exp(-b.*(A'*x))));
+
+evaluateFunc_g = @(x) lambda*norm(x,1);
+evaluateGrad_g = @(x) lambda*sign(x);
+evaluateFunc_gsmooth = @(x) (x.^2/(2*mu))*(norm(x,1) &lt; mu) <span class="keyword">...</span>
+                          + (abs(x) - mu/2)*(norm(x,1) &gt; mu);
+evaluateGrad_gsmooth = @(x) (x/mu)*(norm(x,1) &lt; mu) + (sign(x))*(norm(x,1) &gt; mu);
+
+evaluateFunc_h = @(x) evaluateFunc(x) + evaluateFunc_g(x);
+evaluateGrad_h = @(x) evaluateGrad(x) + evaluateGrad_g(x);
+evaluateGrad_hsmooth = @(x) evaluateGrad(x) + evaluateGrad_gsmooth(x);
+
+prox_g = @(y) (abs(y) - stepSize*lambda).*sign(y);
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="5">parameters of the gradient method</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+xInit = zeros(p, 1); <span class="comment">% zero initialization</span>
+stepSize = 0.1; <span class="comment">% step-size of the gradient method</span>
+tol = 1e-6; <span class="comment">% stopping tolerance</span>
+maxIter = 100; <span class="comment">% maximum number of iterations</span>
+thetaPast = 1;
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="6">optimize</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+<span class="comment">% initialize</span>
+x = xInit;
+xPast = x;
+<span class="comment">% keep track of cost function values</span>
+objVals = zeros(maxIter, 1);
+
+<span class="comment">% iterate</span>
+<span class="keyword">for</span> iter = 1:maxIter
+
+    <span class="comment">% gradient at w</span>
+    grad = evaluateGrad(x);
+
+    <span class="comment">% update</span>
+    <span class="comment">%xNext = x - stepSize*grad;</span>
+
+    <span class="comment">% SGD</span>
+    <span class="comment">%xNext = x - stepSize*evaluateGrad_h(x);</span>
+
+    <span class="comment">%AGM</span>
+    theta = (1+sqrt(1+4*thetaPast^2))/2;
+    beta_t = (thetaPast - 1)/theta;
+    s = x + beta_t*(x - xPast);
+    xNext = prox_g(s - stepSize*evaluateGrad_hsmooth(s));
+
+
+    <span class="comment">% evaluate the objective</span>
+    funcNext = evaluateFunc(xNext);
+
+    <span class="comment">% store the objective and the classification error</span>
+    objVals(iter) = funcNext;
+
+    fprintf(<span class="string">'[%d/%d] [step: %.1e] [objective: %.1e] [norm(grad): %.1e]\n'</span>,<span class="keyword">...</span>
+        iter, maxIter, stepSize, objVals(iter), norm(grad));
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+    <span class="comment">% begin visualize data</span>
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+    <span class="comment">% plot the evolution</span>
+    figure(1);
+    set(gcf, <span class="string">'Color'</span>, <span class="string">'w'</span>);
+    semilogy(1:iter, objVals(1:iter), <span class="string">'b-'</span>,<span class="keyword">...</span>
+        iter, objVals(iter), <span class="string">'b*'</span>, <span class="string">'LineWidth'</span>, 2);
+    grid <span class="string">on</span>;
+    axis <span class="string">tight</span>;
+    xlabel(<span class="string">'iteration'</span>);
+    ylabel(<span class="string">'objective'</span>);
+    title(sprintf(<span class="string">'cost: %.4e'</span>, objVals(iter)));
+    xlim([1 maxIter]);
+    set(gca, <span class="string">'FontSize'</span>, 16);
+    drawnow;
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+    <span class="comment">% end visualize data</span>
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+    <span class="comment">% check stopping criterion</span>
+    <span class="keyword">if</span>(norm(grad) &lt; tol)
+        <span class="keyword">break</span>;
+    <span class="keyword">end</span>
+
+    <span class="comment">% update w</span>
+    thetaPast = theta;
+    xPast = x;
+    x = xNext;
+<span class="keyword">end</span>
+
+<span class="comment">% save for plotting</span>
+cost_gm = objVals;
+save(<span class="string">'plotfile.mat'</span>, <span class="string">'cost_gm'</span>);
+</pre><pre class="codeoutput error">Unrecognized function or variable 'stepSize'.
+
+Error in gm&gt;@(y)(abs(y)-stepSize*lambda).*sign(y) (line 39)
+prox_g = @(y) (abs(y) - stepSize*lambda).*sign(y);
+
+Error in gm (line 75)
+    xNext = prox_g(s - stepSize*evaluateGrad_hsmooth(s));
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Logistic Regression
+%
+% Gradient method with a fixed step
+%
+% U. S. Kamilov, CIG, WUSTL, 2021.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% prepare workspace
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+clear; close all; home;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% load the variables of the optimization problem
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+load('dataset.mat');
+
+[p, n] = size(A);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% set up the function and its gradient
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+lambda = 0.02;
+mu = 0.001;
+evaluateFunc = @(x) (1/n)*sum(log(1+exp(-b.*(A'*x))));
+evaluateGrad = @(x) (1/n)*A*(-b.*exp(-b.*(A'*x))./(1+exp(-b.*(A'*x))));
+
+evaluateFunc_g = @(x) lambda*norm(x,1);
+evaluateGrad_g = @(x) lambda*sign(x);
+evaluateFunc_gsmooth = @(x) (x.^2/(2*mu))*(norm(x,1) < mu) ...
+                          + (abs(x) - mu/2)*(norm(x,1) > mu);
+evaluateGrad_gsmooth = @(x) (x/mu)*(norm(x,1) < mu) + (sign(x))*(norm(x,1) > mu);
+
+evaluateFunc_h = @(x) evaluateFunc(x) + evaluateFunc_g(x);
+evaluateGrad_h = @(x) evaluateGrad(x) + evaluateGrad_g(x);
+evaluateGrad_hsmooth = @(x) evaluateGrad(x) + evaluateGrad_gsmooth(x);
+
+prox_g = @(y) (abs(y) - stepSize*lambda).*sign(y);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% parameters of the gradient method
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+xInit = zeros(p, 1); % zero initialization
+stepSize = 0.1; % step-size of the gradient method
+tol = 1e-6; % stopping tolerance
+maxIter = 100; % maximum number of iterations
+thetaPast = 1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% optimize
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% initialize
+x = xInit;
+xPast = x;
+% keep track of cost function values
+objVals = zeros(maxIter, 1);
+
+% iterate
+for iter = 1:maxIter
+    
+    % gradient at w
+    grad = evaluateGrad(x);
+    
+    % update
+    %xNext = x - stepSize*grad;
+    
+    % SGD
+    %xNext = x - stepSize*evaluateGrad_h(x);
+    
+    %AGM
+    theta = (1+sqrt(1+4*thetaPast^2))/2;
+    beta_t = (thetaPast - 1)/theta;
+    s = x + beta_t*(x - xPast);
+    xNext = prox_g(s - stepSize*evaluateGrad_hsmooth(s));
+    
+    
+    % evaluate the objective
+    funcNext = evaluateFunc(xNext);
+    
+    % store the objective and the classification error
+    objVals(iter) = funcNext;
+    
+    fprintf('[%d/%d] [step: %.1e] [objective: %.1e] [norm(grad): %.1e]\n',...
+        iter, maxIter, stepSize, objVals(iter), norm(grad));
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % begin visualize data
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % plot the evolution
+    figure(1);
+    set(gcf, 'Color', 'w');
+    semilogy(1:iter, objVals(1:iter), 'b-',...
+        iter, objVals(iter), 'b*', 'LineWidth', 2);
+    grid on;
+    axis tight;
+    xlabel('iteration');
+    ylabel('objective');
+    title(sprintf('cost: %.4e', objVals(iter)));
+    xlim([1 maxIter]);
+    set(gca, 'FontSize', 16);
+    drawnow;
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % end visualize data
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % check stopping criterion
+    if(norm(grad) < tol)
+        break;
+    end
+    
+    % update w
+    thetaPast = theta;
+    xPast = x;
+    x = xNext;
+end
+
+% save for plotting
+cost_gm = objVals;
+save('plotfile.mat', 'cost_gm');
+
+##### SOURCE END #####
+--></body></html>

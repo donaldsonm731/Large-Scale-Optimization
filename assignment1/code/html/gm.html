@@ -1,0 +1,509 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>gm</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-10-04"><meta name="DC.source" content="gm.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">prepare workspace</a></li><li><a href="#3">load the variables of the optimization problem</a></li><li><a href="#4">set up the function and its gradient (* edit this *)</a></li><li><a href="#5">parameters of the gradient method</a></li><li><a href="#6">optimize</a></li></ul></div><pre class="codeinput"><span class="comment">% GM with a fixed step</span>
+<span class="comment">%</span>
+<span class="comment">% Least squares: gradient method with fixed step</span>
+<span class="comment">%</span>
+<span class="comment">% U. S. Kamilov, CIG, WUSTL, 2021.</span>
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="2">prepare workspace</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+clear; close <span class="string">all</span>; home;
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="3">load the variables of the optimization problem</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+load(<span class="string">'dataset.mat'</span>);
+
+[m, n] = size(A); <span class="comment">% m rows, n cols</span>
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="4">set up the function and its gradient (* edit this *)</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+evaluateFunc = @(x) (1/2)*norm(A*x-b)^2;
+evaluateGrad = @(x) A'*A*x - A'*b;
+proj_4 = @(x) piecewise(x &lt; 0,0 ,x &gt; 0,x);
+proj_5 = @(x) piecewise(x &lt; 0,0 ,x &gt; 0,x); <span class="comment">% Cond 1, val 1, cond 2, val 2, else val</span>
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="5">parameters of the gradient method</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+xInit = zeros(n, 1); <span class="comment">% zero initialization</span>
+stepSize = 1/(norm(A,2).^2); <span class="comment">% step-size of the gradient method (*** edit this ***)</span>
+tol = 1e-4; <span class="comment">% stopping tolerance</span>
+maxIter = 200; <span class="comment">% maximum number of iterations</span>
+tau = 5;
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+</pre><h2 id="6">optimize</h2><pre class="codeinput"><span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+<span class="comment">% initialize</span>
+x = xInit;
+
+<span class="comment">% keep track of cost function values</span>
+objVals = zeros(maxIter, 1);
+infErrs = zeros(maxIter, 1);
+
+<span class="comment">% iterate</span>
+<span class="keyword">for</span> iter = 1:maxIter
+
+    <span class="comment">% gradient at w</span>
+    grad = evaluateGrad(x);
+    <span class="comment">% update using GM(*** edit this ***)</span>
+    xNext = x - stepSize*grad;
+
+    <span class="comment">%%%%%%%%%%%%%%%% update using PGM %%%%%%%%%%%%%%%%%%%%</span>
+    <span class="comment">%xNext = proj_4(x - stepSize*grad);</span>
+
+    <span class="comment">%%%%%%%%%%%%%%%% update using CGM %%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+    <span class="comment">%[M, I] = max(abs(grad));</span>
+    <span class="comment">%e = grad(I)/norm(grad(I));</span>
+
+    <span class="comment">%s = -tau*sign(grad(I));</span>
+    <span class="comment">%stepSize = proj_5(((s-x)'*A'*(b-A*x))/norm(A*(s-x)).^2);</span>
+    <span class="comment">%xNext = (1-stepSize)*x + stepSize*s;</span>
+
+    <span class="comment">% evaluate the objective</span>
+    funcNext = evaluateFunc(xNext);
+
+    <span class="comment">% store the objective and the classification error</span>
+    objVals(iter) = funcNext;
+    infErrs(iter) = norm(x(:)-xtrue(:))/norm(xtrue(:));
+
+    fprintf(<span class="string">'[%d/%d] [step: %.1e] [objective: %.1e]\n'</span>,<span class="keyword">...</span>
+        iter, maxIter, stepSize, objVals(iter));
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+    <span class="comment">% begin visualize data</span>
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+    <span class="comment">% plot the evolution</span>
+    figure(1);
+    set(gcf, <span class="string">'Color'</span>, <span class="string">'w'</span>);
+    subplot(2, 2, 1:2);
+    stem(1:n, xtrue);
+    hold <span class="string">on</span>;
+    stem(1:n, x, <span class="string">'r*'</span>);
+    hold <span class="string">off</span>;
+    xlim([1, n])
+    subplot(2, 2, 3);
+    semilogy(1:iter, objVals(1:iter), <span class="string">'b-'</span>,<span class="keyword">...</span>
+        iter, objVals(iter), <span class="string">'b*'</span>, <span class="string">'LineWidth'</span>, 2);
+    grid <span class="string">on</span>;
+    axis <span class="string">tight</span>;
+    xlabel(<span class="string">'iteration'</span>);
+    ylabel(<span class="string">'objective'</span>);
+    title(sprintf(<span class="string">'cost: %.4e'</span>, objVals(iter)));
+    xlim([1 maxIter]);
+    set(gca, <span class="string">'FontSize'</span>, 16);
+    subplot(2, 2, 4);
+    semilogy(1:iter, infErrs(1:iter), <span class="string">'r-'</span>,<span class="keyword">...</span>
+        iter, infErrs(iter), <span class="string">'r*'</span>, <span class="string">'LineWidth'</span>, 2);
+    grid <span class="string">on</span>;
+    axis <span class="string">tight</span>;
+    xlabel(<span class="string">'iteration'</span>);
+    ylabel(<span class="string">'normalized error'</span>);
+    title(sprintf(<span class="string">'err: %.2e'</span>, infErrs(iter)));
+    xlim([1 maxIter]);
+    set(gca, <span class="string">'FontSize'</span>, 16);
+    drawnow;
+
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+    <span class="comment">% end visualize data</span>
+    <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+    <span class="comment">% update w</span>
+    x = xNext;
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">[1/200] [step: 6.5e-03] [objective: 1.3e+01]
+[2/200] [step: 6.5e-03] [objective: 6.7e+00]
+[3/200] [step: 6.5e-03] [objective: 4.4e+00]
+[4/200] [step: 6.5e-03] [objective: 3.1e+00]
+[5/200] [step: 6.5e-03] [objective: 2.2e+00]
+[6/200] [step: 6.5e-03] [objective: 1.7e+00]
+[7/200] [step: 6.5e-03] [objective: 1.3e+00]
+[8/200] [step: 6.5e-03] [objective: 1.0e+00]
+[9/200] [step: 6.5e-03] [objective: 8.0e-01]
+[10/200] [step: 6.5e-03] [objective: 6.4e-01]
+[11/200] [step: 6.5e-03] [objective: 5.2e-01]
+[12/200] [step: 6.5e-03] [objective: 4.2e-01]
+[13/200] [step: 6.5e-03] [objective: 3.4e-01]
+[14/200] [step: 6.5e-03] [objective: 2.8e-01]
+[15/200] [step: 6.5e-03] [objective: 2.3e-01]
+[16/200] [step: 6.5e-03] [objective: 1.9e-01]
+[17/200] [step: 6.5e-03] [objective: 1.6e-01]
+[18/200] [step: 6.5e-03] [objective: 1.4e-01]
+[19/200] [step: 6.5e-03] [objective: 1.1e-01]
+[20/200] [step: 6.5e-03] [objective: 9.6e-02]
+[21/200] [step: 6.5e-03] [objective: 8.1e-02]
+[22/200] [step: 6.5e-03] [objective: 6.9e-02]
+[23/200] [step: 6.5e-03] [objective: 5.9e-02]
+[24/200] [step: 6.5e-03] [objective: 5.0e-02]
+[25/200] [step: 6.5e-03] [objective: 4.3e-02]
+[26/200] [step: 6.5e-03] [objective: 3.7e-02]
+[27/200] [step: 6.5e-03] [objective: 3.2e-02]
+[28/200] [step: 6.5e-03] [objective: 2.7e-02]
+[29/200] [step: 6.5e-03] [objective: 2.4e-02]
+[30/200] [step: 6.5e-03] [objective: 2.1e-02]
+[31/200] [step: 6.5e-03] [objective: 1.8e-02]
+[32/200] [step: 6.5e-03] [objective: 1.6e-02]
+[33/200] [step: 6.5e-03] [objective: 1.4e-02]
+[34/200] [step: 6.5e-03] [objective: 1.2e-02]
+[35/200] [step: 6.5e-03] [objective: 1.0e-02]
+[36/200] [step: 6.5e-03] [objective: 9.1e-03]
+[37/200] [step: 6.5e-03] [objective: 8.0e-03]
+[38/200] [step: 6.5e-03] [objective: 7.0e-03]
+[39/200] [step: 6.5e-03] [objective: 6.2e-03]
+[40/200] [step: 6.5e-03] [objective: 5.5e-03]
+[41/200] [step: 6.5e-03] [objective: 4.8e-03]
+[42/200] [step: 6.5e-03] [objective: 4.3e-03]
+[43/200] [step: 6.5e-03] [objective: 3.8e-03]
+[44/200] [step: 6.5e-03] [objective: 3.3e-03]
+[45/200] [step: 6.5e-03] [objective: 3.0e-03]
+[46/200] [step: 6.5e-03] [objective: 2.6e-03]
+[47/200] [step: 6.5e-03] [objective: 2.3e-03]
+[48/200] [step: 6.5e-03] [objective: 2.1e-03]
+[49/200] [step: 6.5e-03] [objective: 1.9e-03]
+[50/200] [step: 6.5e-03] [objective: 1.7e-03]
+[51/200] [step: 6.5e-03] [objective: 1.5e-03]
+[52/200] [step: 6.5e-03] [objective: 1.3e-03]
+[53/200] [step: 6.5e-03] [objective: 1.2e-03]
+[54/200] [step: 6.5e-03] [objective: 1.1e-03]
+[55/200] [step: 6.5e-03] [objective: 9.4e-04]
+[56/200] [step: 6.5e-03] [objective: 8.4e-04]
+[57/200] [step: 6.5e-03] [objective: 7.5e-04]
+[58/200] [step: 6.5e-03] [objective: 6.8e-04]
+[59/200] [step: 6.5e-03] [objective: 6.1e-04]
+[60/200] [step: 6.5e-03] [objective: 5.4e-04]
+[61/200] [step: 6.5e-03] [objective: 4.9e-04]
+[62/200] [step: 6.5e-03] [objective: 4.4e-04]
+[63/200] [step: 6.5e-03] [objective: 3.9e-04]
+[64/200] [step: 6.5e-03] [objective: 3.5e-04]
+[65/200] [step: 6.5e-03] [objective: 3.2e-04]
+[66/200] [step: 6.5e-03] [objective: 2.9e-04]
+[67/200] [step: 6.5e-03] [objective: 2.6e-04]
+[68/200] [step: 6.5e-03] [objective: 2.3e-04]
+[69/200] [step: 6.5e-03] [objective: 2.1e-04]
+[70/200] [step: 6.5e-03] [objective: 1.9e-04]
+[71/200] [step: 6.5e-03] [objective: 1.7e-04]
+[72/200] [step: 6.5e-03] [objective: 1.5e-04]
+[73/200] [step: 6.5e-03] [objective: 1.4e-04]
+[74/200] [step: 6.5e-03] [objective: 1.2e-04]
+[75/200] [step: 6.5e-03] [objective: 1.1e-04]
+[76/200] [step: 6.5e-03] [objective: 1.0e-04]
+[77/200] [step: 6.5e-03] [objective: 9.0e-05]
+[78/200] [step: 6.5e-03] [objective: 8.1e-05]
+[79/200] [step: 6.5e-03] [objective: 7.3e-05]
+[80/200] [step: 6.5e-03] [objective: 6.6e-05]
+[81/200] [step: 6.5e-03] [objective: 6.0e-05]
+[82/200] [step: 6.5e-03] [objective: 5.4e-05]
+[83/200] [step: 6.5e-03] [objective: 4.9e-05]
+[84/200] [step: 6.5e-03] [objective: 4.4e-05]
+[85/200] [step: 6.5e-03] [objective: 4.0e-05]
+[86/200] [step: 6.5e-03] [objective: 3.6e-05]
+[87/200] [step: 6.5e-03] [objective: 3.2e-05]
+[88/200] [step: 6.5e-03] [objective: 2.9e-05]
+[89/200] [step: 6.5e-03] [objective: 2.6e-05]
+[90/200] [step: 6.5e-03] [objective: 2.4e-05]
+[91/200] [step: 6.5e-03] [objective: 2.2e-05]
+[92/200] [step: 6.5e-03] [objective: 1.9e-05]
+[93/200] [step: 6.5e-03] [objective: 1.8e-05]
+[94/200] [step: 6.5e-03] [objective: 1.6e-05]
+[95/200] [step: 6.5e-03] [objective: 1.4e-05]
+[96/200] [step: 6.5e-03] [objective: 1.3e-05]
+[97/200] [step: 6.5e-03] [objective: 1.2e-05]
+[98/200] [step: 6.5e-03] [objective: 1.1e-05]
+[99/200] [step: 6.5e-03] [objective: 9.6e-06]
+[100/200] [step: 6.5e-03] [objective: 8.6e-06]
+[101/200] [step: 6.5e-03] [objective: 7.8e-06]
+[102/200] [step: 6.5e-03] [objective: 7.1e-06]
+[103/200] [step: 6.5e-03] [objective: 6.4e-06]
+[104/200] [step: 6.5e-03] [objective: 5.8e-06]
+[105/200] [step: 6.5e-03] [objective: 5.2e-06]
+[106/200] [step: 6.5e-03] [objective: 4.7e-06]
+[107/200] [step: 6.5e-03] [objective: 4.3e-06]
+[108/200] [step: 6.5e-03] [objective: 3.9e-06]
+[109/200] [step: 6.5e-03] [objective: 3.5e-06]
+[110/200] [step: 6.5e-03] [objective: 3.2e-06]
+[111/200] [step: 6.5e-03] [objective: 2.9e-06]
+[112/200] [step: 6.5e-03] [objective: 2.6e-06]
+[113/200] [step: 6.5e-03] [objective: 2.3e-06]
+[114/200] [step: 6.5e-03] [objective: 2.1e-06]
+[115/200] [step: 6.5e-03] [objective: 1.9e-06]
+[116/200] [step: 6.5e-03] [objective: 1.7e-06]
+[117/200] [step: 6.5e-03] [objective: 1.6e-06]
+[118/200] [step: 6.5e-03] [objective: 1.4e-06]
+[119/200] [step: 6.5e-03] [objective: 1.3e-06]
+[120/200] [step: 6.5e-03] [objective: 1.2e-06]
+[121/200] [step: 6.5e-03] [objective: 1.0e-06]
+[122/200] [step: 6.5e-03] [objective: 9.5e-07]
+[123/200] [step: 6.5e-03] [objective: 8.6e-07]
+[124/200] [step: 6.5e-03] [objective: 7.7e-07]
+[125/200] [step: 6.5e-03] [objective: 7.0e-07]
+[126/200] [step: 6.5e-03] [objective: 6.3e-07]
+[127/200] [step: 6.5e-03] [objective: 5.7e-07]
+[128/200] [step: 6.5e-03] [objective: 5.2e-07]
+[129/200] [step: 6.5e-03] [objective: 4.7e-07]
+[130/200] [step: 6.5e-03] [objective: 4.2e-07]
+[131/200] [step: 6.5e-03] [objective: 3.8e-07]
+[132/200] [step: 6.5e-03] [objective: 3.5e-07]
+[133/200] [step: 6.5e-03] [objective: 3.1e-07]
+[134/200] [step: 6.5e-03] [objective: 2.8e-07]
+[135/200] [step: 6.5e-03] [objective: 2.6e-07]
+[136/200] [step: 6.5e-03] [objective: 2.3e-07]
+[137/200] [step: 6.5e-03] [objective: 2.1e-07]
+[138/200] [step: 6.5e-03] [objective: 1.9e-07]
+[139/200] [step: 6.5e-03] [objective: 1.7e-07]
+[140/200] [step: 6.5e-03] [objective: 1.6e-07]
+[141/200] [step: 6.5e-03] [objective: 1.4e-07]
+[142/200] [step: 6.5e-03] [objective: 1.3e-07]
+[143/200] [step: 6.5e-03] [objective: 1.2e-07]
+[144/200] [step: 6.5e-03] [objective: 1.0e-07]
+[145/200] [step: 6.5e-03] [objective: 9.4e-08]
+[146/200] [step: 6.5e-03] [objective: 8.5e-08]
+[147/200] [step: 6.5e-03] [objective: 7.7e-08]
+[148/200] [step: 6.5e-03] [objective: 7.0e-08]
+[149/200] [step: 6.5e-03] [objective: 6.3e-08]
+[150/200] [step: 6.5e-03] [objective: 5.7e-08]
+[151/200] [step: 6.5e-03] [objective: 5.2e-08]
+[152/200] [step: 6.5e-03] [objective: 4.7e-08]
+[153/200] [step: 6.5e-03] [objective: 4.2e-08]
+[154/200] [step: 6.5e-03] [objective: 3.8e-08]
+[155/200] [step: 6.5e-03] [objective: 3.5e-08]
+[156/200] [step: 6.5e-03] [objective: 3.1e-08]
+[157/200] [step: 6.5e-03] [objective: 2.8e-08]
+[158/200] [step: 6.5e-03] [objective: 2.6e-08]
+[159/200] [step: 6.5e-03] [objective: 2.3e-08]
+[160/200] [step: 6.5e-03] [objective: 2.1e-08]
+[161/200] [step: 6.5e-03] [objective: 1.9e-08]
+[162/200] [step: 6.5e-03] [objective: 1.7e-08]
+[163/200] [step: 6.5e-03] [objective: 1.6e-08]
+[164/200] [step: 6.5e-03] [objective: 1.4e-08]
+[165/200] [step: 6.5e-03] [objective: 1.3e-08]
+[166/200] [step: 6.5e-03] [objective: 1.2e-08]
+[167/200] [step: 6.5e-03] [objective: 1.0e-08]
+[168/200] [step: 6.5e-03] [objective: 9.5e-09]
+[169/200] [step: 6.5e-03] [objective: 8.6e-09]
+[170/200] [step: 6.5e-03] [objective: 7.7e-09]
+[171/200] [step: 6.5e-03] [objective: 7.0e-09]
+[172/200] [step: 6.5e-03] [objective: 6.3e-09]
+[173/200] [step: 6.5e-03] [objective: 5.7e-09]
+[174/200] [step: 6.5e-03] [objective: 5.2e-09]
+[175/200] [step: 6.5e-03] [objective: 4.7e-09]
+[176/200] [step: 6.5e-03] [objective: 4.3e-09]
+[177/200] [step: 6.5e-03] [objective: 3.8e-09]
+[178/200] [step: 6.5e-03] [objective: 3.5e-09]
+[179/200] [step: 6.5e-03] [objective: 3.1e-09]
+[180/200] [step: 6.5e-03] [objective: 2.8e-09]
+[181/200] [step: 6.5e-03] [objective: 2.6e-09]
+[182/200] [step: 6.5e-03] [objective: 2.3e-09]
+[183/200] [step: 6.5e-03] [objective: 2.1e-09]
+[184/200] [step: 6.5e-03] [objective: 1.9e-09]
+[185/200] [step: 6.5e-03] [objective: 1.7e-09]
+[186/200] [step: 6.5e-03] [objective: 1.6e-09]
+[187/200] [step: 6.5e-03] [objective: 1.4e-09]
+[188/200] [step: 6.5e-03] [objective: 1.3e-09]
+[189/200] [step: 6.5e-03] [objective: 1.2e-09]
+[190/200] [step: 6.5e-03] [objective: 1.0e-09]
+[191/200] [step: 6.5e-03] [objective: 9.5e-10]
+[192/200] [step: 6.5e-03] [objective: 8.6e-10]
+[193/200] [step: 6.5e-03] [objective: 7.8e-10]
+[194/200] [step: 6.5e-03] [objective: 7.0e-10]
+[195/200] [step: 6.5e-03] [objective: 6.4e-10]
+[196/200] [step: 6.5e-03] [objective: 5.8e-10]
+[197/200] [step: 6.5e-03] [objective: 5.2e-10]
+[198/200] [step: 6.5e-03] [objective: 4.7e-10]
+[199/200] [step: 6.5e-03] [objective: 4.3e-10]
+[200/200] [step: 6.5e-03] [objective: 3.9e-10]
+</pre><img vspace="5" hspace="5" src="gm_01.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% GM with a fixed step
+%
+% Least squares: gradient method with fixed step
+%
+% U. S. Kamilov, CIG, WUSTL, 2021.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% prepare workspace
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+clear; close all; home;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% load the variables of the optimization problem
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+load('dataset.mat');
+
+[m, n] = size(A); % m rows, n cols
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% set up the function and its gradient (*** edit this ***)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+evaluateFunc = @(x) (1/2)*norm(A*x-b)^2;
+evaluateGrad = @(x) A'*A*x - A'*b;
+proj_4 = @(x) piecewise(x < 0,0 ,x > 0,x);
+proj_5 = @(x) piecewise(x < 0,0 ,x > 0,x); % Cond 1, val 1, cond 2, val 2, else val
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% parameters of the gradient method
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+xInit = zeros(n, 1); % zero initialization
+stepSize = 1/(norm(A,2).^2); % step-size of the gradient method (*** edit this ***)
+tol = 1e-4; % stopping tolerance
+maxIter = 200; % maximum number of iterations
+tau = 5;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% optimize
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% initialize
+x = xInit;
+
+% keep track of cost function values
+objVals = zeros(maxIter, 1);
+infErrs = zeros(maxIter, 1);
+
+% iterate
+for iter = 1:maxIter
+    
+    % gradient at w
+    grad = evaluateGrad(x);
+    % update using GM(*** edit this ***)
+    xNext = x - stepSize*grad;
+    
+    %%%%%%%%%%%%%%%% update using PGM %%%%%%%%%%%%%%%%%%%%
+    %xNext = proj_4(x - stepSize*grad);
+    
+    %%%%%%%%%%%%%%%% update using CGM %%%%%%%%%%%%%%%%%%%%%%%%%%
+    %[M, I] = max(abs(grad));
+    %e = grad(I)/norm(grad(I));
+    
+    %s = -tau*sign(grad(I));
+    %stepSize = proj_5(((s-x)'*A'*(b-A*x))/norm(A*(s-x)).^2);
+    %xNext = (1-stepSize)*x + stepSize*s;
+    
+    % evaluate the objective
+    funcNext = evaluateFunc(xNext);
+    
+    % store the objective and the classification error
+    objVals(iter) = funcNext;
+    infErrs(iter) = norm(x(:)-xtrue(:))/norm(xtrue(:));
+   
+    fprintf('[%d/%d] [step: %.1e] [objective: %.1e]\n',...
+        iter, maxIter, stepSize, objVals(iter));
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % begin visualize data
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % plot the evolution
+    figure(1);
+    set(gcf, 'Color', 'w');
+    subplot(2, 2, 1:2);
+    stem(1:n, xtrue);
+    hold on;
+    stem(1:n, x, 'r*');
+    hold off;
+    xlim([1, n])
+    subplot(2, 2, 3);
+    semilogy(1:iter, objVals(1:iter), 'b-',...
+        iter, objVals(iter), 'b*', 'LineWidth', 2);
+    grid on;
+    axis tight;
+    xlabel('iteration');
+    ylabel('objective');
+    title(sprintf('cost: %.4e', objVals(iter)));
+    xlim([1 maxIter]);
+    set(gca, 'FontSize', 16);
+    subplot(2, 2, 4);
+    semilogy(1:iter, infErrs(1:iter), 'r-',...
+        iter, infErrs(iter), 'r*', 'LineWidth', 2);
+    grid on;
+    axis tight;
+    xlabel('iteration');
+    ylabel('normalized error');
+    title(sprintf('err: %.2e', infErrs(iter)));
+    xlim([1 maxIter]);
+    set(gca, 'FontSize', 16);
+    drawnow;
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % end visualize data
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % update w
+    x = xNext;
+end
+
+##### SOURCE END #####
+--></body></html>
